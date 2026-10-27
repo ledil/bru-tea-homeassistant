@@ -15,6 +15,7 @@ NAME_PREFIX = "BRU"
 
 CMD_SET_TIME = 0x08
 CMD_BREW_START = 0x40
+CMD_CANCEL = 0x42
 CMD_BRU_STATUS = 0x44
 CMD_BUTTON_PRESS = 0x46
 
@@ -168,6 +169,10 @@ def set_time_command() -> bytes:
     lt = time.localtime()
     local = int(time.time() + (lt.tm_gmtoff or 0))
     return build_frame(CMD_SET_TIME, struct.pack("<I", local & 0xFFFFFFFF), 8)
+
+
+def cancel_command() -> bytes:
+    return build_frame(CMD_CANCEL, b"", 4)
 
 
 def button_command(button: int) -> bytes:

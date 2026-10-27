@@ -39,6 +39,7 @@ def _get_device(hass: HomeAssistant, call: ServiceCall) -> BruDevice:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     dev = BruDevice(hass, entry.data[CONF_ADDRESS], entry.title)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = dev
+    dev.async_start()
 
     if not hass.services.has_service(DOMAIN, "brew"):
         async def brew(call: ServiceCall) -> None:

@@ -8,11 +8,13 @@ Steuert die **BRU Maker One** Teemaschine lokal per Bluetooth LE – ohne Cloud 
 - Auswahl von Temperatur, Brühzeit und Wassermenge, Schalter „Spülen“
 - Buttons: Tee zubereiten, Abbrechen, Status aktualisieren
 - Sensoren: Status, Phase (z. B. `brewingSteeping`, `msgPlaceCup`), letztes Brüh-Ergebnis
+- Status läuft dauerhaft mit, ohne Verbindung: Die Maschine sendet ihn in ihren Bluetooth-Signalen (Advertisements).
+  Verbunden wird nur zum Brühen und Abbrechen, die Handy-App bleibt also nutzbar.
 - Dienst `bru_tea.brew` für Automationen
 
 ## Installation über HACS
 1. HACS → ⋮ → **Benutzerdefinierte Repositories**
-2. URL dieses Repositorys eintragen, Typ **Integration**
+2. `https://github.com/ledil/bru-tea-homeassistant` eintragen, Typ **Integration**
 3. „BRU Tea Maker“ herunterladen und Home Assistant neu starten
 
 ## Einrichten
@@ -50,6 +52,8 @@ automation:
 | Prüfsumme | `((-Summe der Bytes) & 0xFF) XOR 0x3A` |
 | Brühen | Cmd `0x40`, Payload `[0, Temp, Zeit, Wasser, Spülen, 0, 0, Buzzer, 0, 0, 0]` (+ 60 Byte Identität ab Firmware 290626) |
 | Status | Cmd `0x44` → Antwort `0x45` (Status, Unterstatus) |
+| Advertisement | Herstellerdaten mit Firmen-ID davor: Byte 3 = Status, Byte 4 = Phase |
+| Abbrechen | Cmd `0x42` |
 | Brüh-Ergebnis | Antwort `0x41`: 0 OK, 1 Format, 3 Temp, 4 Zeit, 5 Wasser, 16 nicht bereit |
 
 Unter `tools/bru_tea.py` liegt ein eigenständiges Kommandozeilen-Skript (benötigt `pip install bleak`).

@@ -2,14 +2,25 @@
   "domain": "bru_tea",
   "name": "BRU Tea Maker",
   "bluetooth": [
-    { "local_name": "BRU*", "connectable": true },
-    { "service_uuid": "aae28f00-71b5-42a1-8c3c-f9cf6ac969d0", "connectable": true }
+    {
+      "local_name": "BRU*",
+      "connectable": true
+    },
+    {
+      "service_uuid": "aae28f00-71b5-42a1-8c3c-f9cf6ac969d0",
+      "connectable": true
+    }
   ],
-  "codeowners": [],
+  "codeowners": [
+    "@ledil"
+  ],
   "config_flow": true,
-  "dependencies": ["bluetooth_adapters"],
-  "documentation": "https://github.com/",
+  "dependencies": [
+    "bluetooth_adapters"
+  ],
+  "documentation": "https://github.com/ledil/bru-tea-homeassistant",
   "iot_class": "local_push",
+  "issue_tracker": "https://github.com/ledil/bru-tea-homeassistant/issues",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

@@ -65,7 +65,7 @@
     },
     "cancel": {
       "name": "Cancel",
-      "description": "Cancel current process (experimental)",
+      "description": "Cancel current process",
       "fields": {
         "address": {
           "name": "Address",

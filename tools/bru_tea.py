@@ -47,7 +47,7 @@ CMD_SET_TIME      = 0x08
 CMD_GET_SETUP     = 0x2A
 CMD_SET_SETUP     = 0x2C
 CMD_BREW_START    = 0x40
-CMD_DESCALE       = 0x42
+CMD_CANCEL        = 0x42
 CMD_BRU_STATUS    = 0x44
 CMD_BUTTON_PRESS  = 0x46
 CMD_GET_PRESET    = 0x50
@@ -337,8 +337,9 @@ async def run(args):
                         break
 
         elif args.cmd == "cancel":
-            await bru.write(button_command(0))   # cancelProcess() sendet Button-Code 0
-            await bru.wait_for(RSP_BUTTON_RESULT, 3)
+            await bru.write(build_frame(CMD_CANCEL, b"", 4))   # cancelProcess() der App
+            await asyncio.sleep(0.3)
+            await bru.status()
 
         await asyncio.sleep(0.5)
 
@@ -349,7 +350,7 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("scan", help="BRU-Maschinen in der Nähe suchen")
     sub.add_parser("status", help="Maschinenstatus abfragen")
-    sub.add_parser("cancel", help="Laufenden Vorgang abbrechen (experimentell)")
+    sub.add_parser("cancel", help="Laufenden Vorgang abbrechen")
     b = sub.add_parser("brew", help="Tee zubereiten")
     b.add_argument("--temp", default="80", help="cold, 45-95 (5er-Schritte) oder max  [80]")
     b.add_argument("--time", default="3:00", help="m:ss, 0:10-9:50 / 10:00-60:00  [3:00]")

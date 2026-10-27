@@ -65,7 +65,7 @@
     },
     "cancel": {
       "name": "Abbrechen",
-      "description": "Laufenden Vorgang abbrechen (experimentell)",
+      "description": "Laufenden Vorgang abbrechen",
       "fields": {
         "address": {
           "name": "Adresse",

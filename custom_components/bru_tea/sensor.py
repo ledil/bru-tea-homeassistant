@@ -30,8 +30,13 @@ class StatusSensor(BruEntity, SensorEntity):
     @property
     def extra_state_attributes(self):
         return {"status_code": self.dev.status, "substatus": self.dev.substatus_name,
-                "substatus_code": self.dev.substatus, "connected": self.dev.connected,
+                "substatus_code": self.dev.substatus, "source": self.dev.status_source,
+                "connected": self.dev.connected, "rssi": self.dev.rssi,
                 "firmware": self.dev.firmware}
+
+    @property
+    def available(self) -> bool:
+        return self.dev.available or self.dev.connected
 
 
 class SubStatusSensor(BruEntity, SensorEntity):
@@ -39,6 +44,10 @@ class SubStatusSensor(BruEntity, SensorEntity):
 
     def __init__(self, dev):
         super().__init__(dev, "substatus", "Phase")
+
+    @property
+    def available(self) -> bool:
+        return self.dev.available or self.dev.connected
 
     @property
     def native_value(self):

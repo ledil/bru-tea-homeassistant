@@ -39,6 +39,70 @@ class BruDevice:
         self._queue: asyncio.Queue[bytes] = asyncio.Queue()
         self._monitor: asyncio.Task | None = None
         self._listeners: list[Callable[[], None]] = []
+        self.available = False          # Maschine sendet Bluetooth-Signale
+        self.status_source: str | None = None   # "advertising" | "connected"
+        self.rssi: int | None = None
+        self._unsubs: list[Callable[[], None]] = []
+
+    # ---- Passiver Status aus Bluetooth-Advertisements -----------------------
+    @callback
+    def async_start(self) -> None:
+        """Advertisements abonnieren (keine Verbindung nötig)."""
+        self._unsubs.append(bluetooth.async_register_callback(
+            self.hass, self._on_advertisement,
+            bluetooth.BluetoothCallbackMatcher(address=self.address, connectable=False),
+            bluetooth.BluetoothScanningMode.ACTIVE))
+        self._unsubs.append(bluetooth.async_track_unavailable(
+            self.hass, self._on_unavailable, self.address, connectable=False))
+        last = bluetooth.async_last_service_info(self.hass, self.address,
+                                                 connectable=False)
+        if last is not None:
+            self._on_advertisement(last, None)
+
+    @callback
+    def async_stop(self) -> None:
+        while self._unsubs:
+            self._unsubs.pop()()
+
+    @staticmethod
+    def parse_advertisement(info) -> tuple[int, int] | None:
+        """Wie parseAdvertisingData der App: Puffer = Firmen-ID (2 Byte LE) +
+        Herstellerdaten, Status = Byte 3, Phase = Byte 4. Fallback: Service-Daten."""
+        candidates = [cid.to_bytes(2, "little") + bytes(data)
+                      for cid, data in (info.manufacturer_data or {}).items()]
+        candidates += [bytes(data) for uuid_, data in (info.service_data or {}).items()
+                       if uuid_.lower() == p.SERVICE_UUID]
+        fallback = None
+        for raw in candidates:
+            if len(raw) < 5:
+                continue
+            if raw[3] in p.STATUS:
+                return raw[3], raw[4]
+            fallback = fallback or (raw[3], raw[4])
+        return fallback
+
+    @callback
+    def _on_advertisement(self, info, _change) -> None:
+        self.rssi = info.rssi
+        changed = not self.available
+        self.available = True
+        if not self.connected:          # verbundener Status hat Vorrang (wie in der App)
+            parsed = self.parse_advertisement(info)
+            if parsed is not None and (parsed != (self.status, self.substatus)
+                                       or self.status_source != "advertising"):
+                self.status, self.substatus = parsed
+                self.status_source = "advertising"
+                changed = True
+        if changed:
+            self._notify_listeners()
+
+    @callback
+    def _on_unavailable(self, _info) -> None:
+        self.available = False
+        if not self.connected:
+            self.status = self.substatus = None
+            self.status_source = None
+        self._notify_listeners()
 
     # ---- Listener für Entitäten -------------------------------------------
     @property
@@ -74,6 +138,7 @@ class BruDevice:
         _LOGGER.debug("BRU <- %s", data.hex(" "))
         if len(data) > 4 and data[2] == p.RSP_STATUS:
             self.status, self.substatus = data[3], data[4]
+            self.status_source = "connected"
             self._notify_listeners()
         elif len(data) > 3 and data[2] == p.RSP_BREW_RESULT:
             self.last_result = p.BREW_RESULT.get(data[3], f"Unbekannt ({data[3]})")
@@ -209,16 +274,19 @@ class BruDevice:
                 await self._disconnect()
 
     async def async_cancel(self) -> None:
-        """Laufenden Vorgang abbrechen (App sendet Button-Code 0 – experimentell)."""
+        """Laufenden Vorgang abbrechen (Befehl 0x42, wie die App)."""
         async with self._lock:
             temp = self._client is None
             await self._ensure_connected()
-            await self._write(p.button_command(0))
-            await self._wait_for(p.RSP_BUTTON_RESULT, 3)
+            await self._write(p.cancel_command())
+            await asyncio.sleep(0.3)
+            await self._write(p.status_command())
+            await self._wait_for(p.RSP_STATUS, 3)
             if temp and (self._monitor is None or self._monitor.done()):
                 await self._disconnect()
 
     async def async_shutdown(self) -> None:
+        self.async_stop()
         if self._monitor is not None:
             self._monitor.cancel()
         await self._disconnect()
