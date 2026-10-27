@@ -128,6 +128,30 @@ class BruDevice:
         return None if self.status is None else p.STATUS.get(self.status, str(self.status))
 
     @property
+    def lang(self) -> str:
+        return "de" if (self.hass.config.language or "").startswith("de") else "en"
+
+    @property
+    def phase_text(self) -> str | None:
+        """Klartext der Phase, wie ihn die App anzeigt (z. B. 'Bitte Deckel schließen')."""
+        if self.substatus is None:
+            return None
+        key = p.PHASE_KEY.get(self.substatus)
+        if key:
+            return p.PHASE_TEXT[self.lang][key]
+        return p.EXTRA_PHASE_TEXT[self.lang].get(self.substatus, self.substatus_name)
+
+    @property
+    def status_text(self) -> str | None:
+        """Klartext des Status; bei Hinweis/Warnung/Fehler mit Meldung."""
+        if self.status is None:
+            return None
+        text = p.STATUS_TEXT[self.lang].get(self.status, self.status_name)
+        if self.status in p.MESSAGE_STATUSES and self.substatus in p.PHASE_KEY:
+            return f"{text}: {self.phase_text}"
+        return text
+
+    @property
     def substatus_name(self) -> str | None:
         return None if self.substatus is None else p.SUBSTATUS.get(self.substatus,
                                                                    str(self.substatus))

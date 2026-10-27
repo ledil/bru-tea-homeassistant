@@ -7,7 +7,9 @@ Steuert die **BRU Maker One** Teemaschine lokal per Bluetooth LE – ohne Cloud 
 - Koppeln mit Pairing-Code direkt im Einrichtungsdialog
 - Auswahl von Temperatur, Brühzeit und Wassermenge, Schalter „Spülen“
 - Buttons: Tee zubereiten, Abbrechen, Status aktualisieren
-- Sensoren: Status, Phase (z. B. `brewingSteeping`, `msgPlaceCup`), letztes Brüh-Ergebnis
+- Sensoren mit Klartext wie in der App: Status (z. B. „Brühen“, „Warnung: Bitte Deckel schließen“),
+  Phase (z. B. „Ziehen lassen“, „Guten Tee!“), letztes Brüh-Ergebnis.
+  Die internen Namen stehen in den Attributen `status_raw` / `substatus_raw` (für Automationen).
 - Status läuft dauerhaft mit, ohne Verbindung: Die Maschine sendet ihn in ihren Bluetooth-Signalen (Advertisements).
   Verbunden wird nur zum Brühen und Abbrechen, die Handy-App bleibt also nutzbar.
 - Dienst `bru_tea.brew` für Automationen
