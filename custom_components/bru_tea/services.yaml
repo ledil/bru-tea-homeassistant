@@ -1,5 +1,9 @@
 brew:
   fields:
+    tea:
+      example: "Grüntee"
+      selector:
+        text:
     temperature:
       example: "80"
       selector:

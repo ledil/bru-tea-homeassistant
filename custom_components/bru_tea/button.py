@@ -14,7 +14,8 @@ from .entity import BruEntity
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry,
                             async_add_entities: AddEntitiesCallback) -> None:
     dev = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([BrewButton(dev), CancelButton(dev), RefreshButton(dev)])
+    async_add_entities([BrewButton(dev), CancelButton(dev), RefreshButton(dev)]
+                       + [TeaBrewButton(dev, tea) for tea in dev.teas])
 
 
 class BrewButton(BruEntity, ButtonEntity):
@@ -46,3 +47,21 @@ class RefreshButton(BruEntity, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.dev.async_refresh()
+
+
+class TeaBrewButton(BruEntity, ButtonEntity):
+    """Ein Button pro eigener Teesorte."""
+
+    _attr_icon = "mdi:tea"
+
+    def __init__(self, dev, tea: dict):
+        super().__init__(dev, f"brew_{tea['id']}", f"{tea['name']} zubereiten")
+        self._tea_id = tea["id"]
+
+    @property
+    def extra_state_attributes(self):
+        tea = self.dev.get_tea(self._tea_id) or {}
+        return {k: tea.get(k) for k in ("temperature", "time", "water", "rinse")}
+
+    async def async_press(self) -> None:
+        await self.dev.async_brew(tea=self._tea_id)

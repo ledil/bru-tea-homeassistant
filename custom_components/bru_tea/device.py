@@ -14,7 +14,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.device_registry import CONNECTION_BLUETOOTH, DeviceInfo
 
 from . import protocol as p
-from .const import DOMAIN
+from .const import CUSTOM_TEA, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +33,8 @@ class BruDevice:
         self.last_result: str | None = None
         self.connected = False
         self.settings = {"temperature": "80 °C", "time": "3:00", "water": "200 ml",
-                         "rinse": False}
+                         "rinse": False, "tea": CUSTOM_TEA}
+        self.teas: list[dict] = []      # eigene Teesorten aus den Optionen
         self._client = None
         self._lock = asyncio.Lock()
         self._queue: asyncio.Queue[bytes] = asyncio.Queue()
@@ -241,9 +242,52 @@ class BruDevice:
             if not keep:
                 await self._disconnect()
 
+    # ---- Teesorten -------------------------------------------------------------
+    def get_tea(self, name_or_id: str | None) -> dict | None:
+        if not name_or_id:
+            return None
+        key = str(name_or_id).strip().lower()
+        for tea in self.teas:
+            if tea["id"] == name_or_id or tea["name"].strip().lower() == key:
+                return tea
+        return None
+
+    @callback
+    def apply_tea(self, name: str) -> None:
+        """Teesorte auswählen: setzt Temperatur, Zeit, Menge und Spülen."""
+        tea = self.get_tea(name)
+        if tea is None:
+            self.settings["tea"] = CUSTOM_TEA
+        else:
+            self.settings.update(tea=tea["name"], temperature=tea["temperature"],
+                                 time=tea["time"], water=tea["water"],
+                                 rinse=bool(tea.get("rinse", False)))
+        self._notify_listeners()
+
+    @callback
+    def manual_change(self, key: str, value) -> None:
+        """Einzelwert geändert: passt er nicht mehr zur Sorte -> 'Eigene Einstellung'."""
+        self.settings[key] = value
+        tea = self.get_tea(self.settings["tea"])
+        if tea is not None:
+            expected = bool(tea.get("rinse", False)) if key == "rinse" else tea.get(key)
+            if expected != value:
+                self.settings["tea"] = CUSTOM_TEA
+        self._notify_listeners()
+
     async def async_brew(self, temperature=None, brew_time=None, water=None,
-                         rinse=None, buzzer=True) -> None:
-        s = self.settings
+                         rinse=None, buzzer=True, tea: str | None = None) -> None:
+        s = dict(self.settings)
+        preset_name = "Freestyle"
+        if tea:
+            t = self.get_tea(tea)
+            if t is None:
+                raise HomeAssistantError(f"Teesorte '{tea}' ist nicht angelegt")
+            s.update(temperature=t["temperature"], time=t["time"], water=t["water"],
+                     rinse=bool(t.get("rinse", False)))
+            preset_name = t["name"]
+        elif self.get_tea(s["tea"]) is not None:
+            preset_name = s["tea"]
         temperature = temperature if temperature is not None else s["temperature"]
         brew_time = brew_time if brew_time is not None else s["time"]
         water = water if water is not None else s["water"]
@@ -257,7 +301,8 @@ class BruDevice:
             try:
                 frame = p.brew_command(p.temp_code(temperature), p.time_code(brew_time),
                                        p.water_code(water, self.firmware), rinse=rinse,
-                                       buzzer=buzzer, fw=self.firmware)
+                                       buzzer=buzzer, fw=self.firmware,
+                                       name=preset_name)
             except ValueError as err:
                 await self._disconnect()
                 raise HomeAssistantError(str(err)) from err

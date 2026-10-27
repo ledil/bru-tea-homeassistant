@@ -60,6 +60,10 @@
         "address": {
           "name": "Address",
           "description": "Only for multiple machines"
+        },
+        "tea": {
+          "name": "Tea",
+          "description": "Name of a saved tea. Overrides temperature, time, water and rinse."
         }
       }
     },
@@ -82,6 +86,56 @@
           "description": ""
         }
       }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Tea varieties",
+        "description": "Your tea varieties:\n\n{teas}",
+        "menu_options": {
+          "add": "Add tea",
+          "edit": "Edit tea",
+          "delete": "Delete teas"
+        }
+      },
+      "add": {
+        "title": "New tea",
+        "data": {
+          "name": "Name",
+          "temperature": "Temperature",
+          "time": "Brew time",
+          "water": "Water amount",
+          "rinse": "Rinse after brewing"
+        }
+      },
+      "edit": {
+        "title": "Edit tea",
+        "data": {
+          "tea": "Tea"
+        }
+      },
+      "edit_tea": {
+        "title": "Edit tea",
+        "data": {
+          "name": "Name",
+          "temperature": "Temperature",
+          "time": "Brew time",
+          "water": "Water amount",
+          "rinse": "Rinse after brewing"
+        }
+      },
+      "delete": {
+        "title": "Delete teas",
+        "description": "Selected teas will be deleted.",
+        "data": {
+          "teas": "Teas"
+        }
+      }
+    },
+    "error": {
+      "invalid_name": "Please enter a valid name",
+      "duplicate_name": "A tea with this name already exists"
     }
   }
 }

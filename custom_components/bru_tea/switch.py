@@ -33,9 +33,7 @@ class RinseSwitch(BruEntity, RestoreEntity, SwitchEntity):
         return self.dev.settings["rinse"]
 
     async def async_turn_on(self, **kwargs) -> None:
-        self.dev.settings["rinse"] = True
-        self.async_write_ha_state()
+        self.dev.manual_change("rinse", True)
 
     async def async_turn_off(self, **kwargs) -> None:
-        self.dev.settings["rinse"] = False
-        self.async_write_ha_state()
+        self.dev.manual_change("rinse", False)

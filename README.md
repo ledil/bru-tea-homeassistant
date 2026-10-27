@@ -6,6 +6,7 @@ Steuert die **BRU Maker One** Teemaschine lokal per Bluetooth LE – ohne Cloud 
 - Automatische Erkennung der Maschine über Bluetooth
 - Koppeln mit Pairing-Code direkt im Einrichtungsdialog
 - Auswahl von Temperatur, Brühzeit und Wassermenge, Schalter „Spülen“
+- Eigene Teesorten (Name, Temperatur, Zeit, Menge, Spülen) mit Auswahlliste und eigenem Button je Sorte
 - Buttons: Tee zubereiten, Abbrechen, Status aktualisieren
 - Sensoren mit Klartext wie in der App: Status (z. B. „Brühen“, „Warnung: Bitte Deckel schließen“),
   Phase (z. B. „Ziehen lassen“, „Guten Tee!“), letztes Brüh-Ergebnis.
@@ -28,6 +29,17 @@ Steuert die **BRU Maker One** Teemaschine lokal per Bluetooth LE – ohne Cloud 
 
 Voraussetzung: Bluetooth direkt am Home-Assistant-Rechner (eingebaut oder USB-Stick).
 Koppeln mit Code funktioniert nicht über ESPHome-Bluetooth-Proxys.
+
+## Eigene Teesorten
+Einstellungen → Geräte & Dienste → BRU Tea Maker → **Konfigurieren**: Teesorten hinzufügen, bearbeiten oder löschen.
+Für jede Sorte entsteht ein Button „<Name> zubereiten“, außerdem gibt es die Auswahlliste „Teesorte“.
+Beim ersten Start sind Grüntee, Schwarztee, Weißer Tee und Kräutertee als Vorschläge angelegt.
+
+```yaml
+action: bru_tea.brew
+data:
+  tea: Grüntee
+```
 
 ## Beispiel-Automation
 ```yaml
