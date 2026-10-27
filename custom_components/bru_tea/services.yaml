@@ -1,0 +1,38 @@
+brew:
+  fields:
+    temperature:
+      example: "80"
+      selector:
+        text:
+    time:
+      example: "3:00"
+      selector:
+        text:
+    water:
+      example: 200
+      selector:
+        number:
+          min: 50
+          max: 350
+          step: 25
+          unit_of_measurement: ml
+    rinse:
+      selector:
+        boolean:
+    buzzer:
+      default: true
+      selector:
+        boolean:
+    address:
+      selector:
+        text:
+cancel:
+  fields:
+    address:
+      selector:
+        text:
+refresh:
+  fields:
+    address:
+      selector:
+        text:

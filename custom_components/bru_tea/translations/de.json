@@ -1,0 +1,87 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "BRU",
+        "data": {
+          "address": "Gerät"
+        }
+      },
+      "pair": {
+        "title": "Mit {name} koppeln",
+        "description": "1. Trenne die BRU-App auf dem Handy (App schließen).\n2. Aktiviere an der Maschine **Setup → Bluetooth → Pairing**.\n3. Klicke auf **Absenden**. Danach fragt Home Assistant nach dem Code, der auf der Maschine erscheint.\n\nIst die Maschine schon gekoppelt, wird dieser Schritt automatisch übersprungen.\n\n{error}",
+        "data": {
+          "skip": "Koppeln überspringen (nur wenn schon anders gekoppelt)"
+        }
+      },
+      "code": {
+        "title": "Pairing-Code",
+        "description": "Gib den Code ein, der jetzt auf dem Display der Maschine angezeigt wird.\n\n{error}",
+        "data": {
+          "code": "Code"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Bereits eingerichtet",
+      "no_devices_found": "Keine BRU-Maschine gefunden"
+    },
+    "error": {
+      "pair_failed": "Koppeln fehlgeschlagen",
+      "invalid_code": "Nur Ziffern eingeben"
+    }
+  },
+  "services": {
+    "brew": {
+      "name": "Tee zubereiten",
+      "description": "Startet einen Brühvorgang. Nicht angegebene Werte kommen aus den Auswahl-Entitäten.",
+      "fields": {
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Kalt/cold, 45–95 (5er-Schritte) oder max"
+        },
+        "time": {
+          "name": "Brühzeit",
+          "description": "m:ss, 0:10–9:50 (10 s) / 10:00–60:00"
+        },
+        "water": {
+          "name": "Wassermenge",
+          "description": "50–350 ml"
+        },
+        "rinse": {
+          "name": "Spülen",
+          "description": "Nach dem Brühen spülen"
+        },
+        "buzzer": {
+          "name": "Signalton",
+          "description": "Signalton am Ende"
+        },
+        "address": {
+          "name": "Adresse",
+          "description": "Nur bei mehreren Maschinen"
+        }
+      }
+    },
+    "cancel": {
+      "name": "Abbrechen",
+      "description": "Laufenden Vorgang abbrechen (experimentell)",
+      "fields": {
+        "address": {
+          "name": "Adresse",
+          "description": ""
+        }
+      }
+    },
+    "refresh": {
+      "name": "Status aktualisieren",
+      "description": "Status von der Maschine abfragen",
+      "fields": {
+        "address": {
+          "name": "Adresse",
+          "description": ""
+        }
+      }
+    }
+  }
+}

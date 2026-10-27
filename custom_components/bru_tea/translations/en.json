@@ -1,0 +1,87 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "BRU",
+        "data": {
+          "address": "Device"
+        }
+      },
+      "pair": {
+        "title": "Pair with {name}",
+        "description": "1. Disconnect the BRU phone app (close it).\n2. On the machine enable **Setup → Bluetooth → Pairing**.\n3. Click **Submit**. Home Assistant will then ask for the code shown on the machine.\n\nIf the machine is already paired this step is skipped automatically.\n\n{error}",
+        "data": {
+          "skip": "Skip pairing (only if already paired otherwise)"
+        }
+      },
+      "code": {
+        "title": "Pairing code",
+        "description": "Enter the code now shown on the machine's display.\n\n{error}",
+        "data": {
+          "code": "Code"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Already configured",
+      "no_devices_found": "No BRU machine found"
+    },
+    "error": {
+      "pair_failed": "Pairing failed",
+      "invalid_code": "Digits only"
+    }
+  },
+  "services": {
+    "brew": {
+      "name": "Brew tea",
+      "description": "Start brewing. Missing values are taken from the select entities.",
+      "fields": {
+        "temperature": {
+          "name": "Temperature",
+          "description": "Kalt/cold, 45–95 (5er-Schritte) oder max"
+        },
+        "time": {
+          "name": "Brew time",
+          "description": "m:ss, 0:10–9:50 (10 s) / 10:00–60:00"
+        },
+        "water": {
+          "name": "Water",
+          "description": "50–350 ml"
+        },
+        "rinse": {
+          "name": "Rinse",
+          "description": "Rinse after brewing"
+        },
+        "buzzer": {
+          "name": "Buzzer",
+          "description": "Beep when done"
+        },
+        "address": {
+          "name": "Address",
+          "description": "Only for multiple machines"
+        }
+      }
+    },
+    "cancel": {
+      "name": "Cancel",
+      "description": "Cancel current process (experimental)",
+      "fields": {
+        "address": {
+          "name": "Address",
+          "description": ""
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh status",
+      "description": "Query machine status",
+      "fields": {
+        "address": {
+          "name": "Address",
+          "description": ""
+        }
+      }
+    }
+  }
+}
